@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -26,6 +26,46 @@ function MarkingPage() {
     }
   }, [juryId, jury]);
 
+  const handleScoreChange = (newScores) => {
+    setScores(newScores);
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // Save evaluation to localStorage
+      await saveJuryEvaluation(parseInt(juryId), scores);
+      const currentTime = new Date().toISOString();
+      setLastSaved(currentTime);
+      
+      // Show success message
+      alert('Evaluation saved successfully! You can modify and save again anytime.');
+    } catch (error) {
+      console.error('Error saving evaluation:', error);
+      alert('Error saving evaluation. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Auto-save functionality
+  const handleAutoSave = useCallback(async () => {
+    try {
+      await saveJuryEvaluation(parseInt(juryId), scores);
+      setLastSaved(new Date().toISOString());
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+    }
+  }, [juryId, scores]);
+
+  // Auto-save when scores change (debounced)
+  useEffect(() => {
+    if (Object.keys(scores).length > 0) {
+      const timeoutId = setTimeout(handleAutoSave, 2000); // Auto-save after 2 seconds of inactivity
+      return () => clearTimeout(timeoutId);
+    }
+  }, [scores, handleAutoSave]);
+
   if (!jury) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -51,46 +91,6 @@ function MarkingPage() {
       </div>
     );
   }
-
-  const handleScoreChange = (newScores) => {
-    setScores(newScores);
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      // Save evaluation to localStorage
-      await saveJuryEvaluation(parseInt(juryId), scores);
-      const currentTime = new Date().toISOString();
-      setLastSaved(currentTime);
-      
-      // Show success message
-      alert('Evaluation saved successfully! You can modify and save again anytime.');
-    } catch (error) {
-      console.error('Error saving evaluation:', error);
-      alert('Error saving evaluation. Please try again.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Auto-save functionality
-  const handleAutoSave = async () => {
-    try {
-      await saveJuryEvaluation(parseInt(juryId), scores);
-      setLastSaved(new Date().toISOString());
-    } catch (error) {
-      console.error('Auto-save failed:', error);
-    }
-  };
-
-  // Auto-save when scores change (debounced)
-  useEffect(() => {
-    if (Object.keys(scores).length > 0) {
-      const timeoutId = setTimeout(handleAutoSave, 2000); // Auto-save after 2 seconds of inactivity
-      return () => clearTimeout(timeoutId);
-    }
-  }, [scores]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -177,7 +177,7 @@ function MarkingPage() {
           
           {/* Evaluation Table */}
           <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
-            <MarksheetTable onScoreChange={handleScoreChange} />
+            <MarksheetTable onScoreChange={handleScoreChange} initialScores={scores} />
           </div>
           
           {/* Guidelines Card */}

@@ -1,20 +1,37 @@
 import { useState, useEffect } from 'react';
 import { teams, evaluationCriteria } from '../data/juryData';
 
-function MarksheetTable({ onScoreChange }) {
+function MarksheetTable({ onScoreChange, initialScores = {} }) {
   const [scores, setScores] = useState({});
 
-  // Initialize scores state
+  // Initialize scores state with initial scores or empty structure
   useEffect(() => {
-    const initialScores = {};
+    const defaultScores = {};
     teams.forEach(team => {
-      initialScores[team.id] = {};
+      defaultScores[team.id] = {};
       evaluationCriteria.forEach(criteria => {
-        initialScores[team.id][criteria.name] = 0;
+        // Use initial scores if available, otherwise default to 0
+        defaultScores[team.id][criteria.name] = 
+          initialScores[team.id]?.[criteria.name] || 0;
       });
     });
-    setScores(initialScores);
-  }, []);
+    setScores(defaultScores);
+  }, [initialScores]);
+
+  // Update scores when initialScores prop changes
+  useEffect(() => {
+    if (Object.keys(initialScores).length > 0) {
+      const updatedScores = {};
+      teams.forEach(team => {
+        updatedScores[team.id] = {};
+        evaluationCriteria.forEach(criteria => {
+          updatedScores[team.id][criteria.name] = 
+            initialScores[team.id]?.[criteria.name] || 0;
+        });
+      });
+      setScores(updatedScores);
+    }
+  }, [initialScores]);
 
   // Calculate total for a team
   const calculateTotal = (teamId) => {
