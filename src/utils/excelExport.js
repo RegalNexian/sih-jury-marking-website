@@ -76,7 +76,7 @@ const createConsolidatedWorkbook = (data) => {
       index + 1,
       team.name,
       team.projectTitle,
-      team.members.join(', ')
+      (team.members || []).join(', ') || 'No members listed'
     ];
     
     // Add criteria averages
@@ -128,7 +128,7 @@ const createIndividualWorkbook = (scores, juryId) => {
     data.push([
       team.name,
       team.projectTitle,
-      team.members.join(', '),
+      (team.members || []).join(', ') || 'No members listed',
       ...evaluationCriteria.map(criteria => teamScores[criteria.name] || 0),
       total
     ]);

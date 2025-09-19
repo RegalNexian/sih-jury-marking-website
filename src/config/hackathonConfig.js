@@ -20,56 +20,45 @@ export const hackathonConfig = {
   juryMembers: [
     {
       id: 1,
-      name: "Dr. Anita Sharma",
-      designation: "Professor, Computer Science",
-      department: "PMEC",
-      email: "anita.sharma@pmec.edu",
-      phone: "+91-9876543210",
-      expertise: ["AI/ML", "Software Development", "Innovation"],
+      name: "Dr. Raghunandan Swain",
+      designation: "Assistant Professor",
+      department: "ETC",
+      email: "",
+      phone: "",
+      expertise: [],
       isActive: true,
       addedDate: "2025-01-01"
     },
     {
       id: 2,
-      name: "Prof. Rajesh Kumar",
-      designation: "Head of Department, IT",
-      department: "PMEC",
-      email: "rajesh.kumar@pmec.edu",
-      phone: "+91-9876543211",
-      expertise: ["System Design", "Database Management", "Project Management"],
+      name: "Dr. Sasmita Rani Behera",
+      designation: "Assistant Professor",
+      department: "CSE",
+      email: "",
+      phone: "",
+      expertise: [],
       isActive: true,
       addedDate: "2025-01-01"
     },
     {
       id: 3,
-      name: "Dr. Priya Mehta",
-      designation: "Associate Professor, AI/ML",
-      department: "PMEC",
-      email: "priya.mehta@pmec.edu",
-      phone: "+91-9876543212",
-      expertise: ["Machine Learning", "Data Science", "Research"],
+      name: "Dr. Jnanaranjan Mohanty",
+      designation: "Assitant Professor",
+      department: "HSS",
+      email: "",
+      phone: "",
+      expertise: [],
       isActive: true,
       addedDate: "2025-01-01"
     },
     {
       id: 4,
-      name: "Prof. Suresh Patel",
-      designation: "Industry Expert",
-      department: "External",
-      email: "suresh.patel@industry.com",
-      phone: "+91-9876543213",
-      expertise: ["Industry Standards", "Business Analysis", "Product Development"],
-      isActive: true,
-      addedDate: "2025-01-01"
-    },
-    {
-      id: 5,
-      name: "Dr. Kavita Jain",
-      designation: "Assistant Professor, Electronics",
-      department: "PMEC",
-      email: "kavita.jain@pmec.edu",
-      phone: "+91-9876543214",
-      expertise: ["IoT", "Hardware Design", "Embedded Systems"],
+      name: "Dr. Ritanjali Behera",
+      designation: "Assistant Professor",
+      department: "EE",
+      email: "",
+      phone: "",
+      expertise: [],
       isActive: true,
       addedDate: "2025-01-01"
     }
@@ -78,91 +67,309 @@ export const hackathonConfig = {
   // Teams Configuration
   teams: [
     {
-      id: 1,
-      name: "Team Alpha",
-      members: ["Rahul Sharma", "Priya Singh", "Amit Kumar"],
-      projectTitle: "Smart Traffic Management System",
-      category: "Smart Cities",
-      registrationDate: "2025-01-15",
-      isActive: true
+      "id": 1,
+      "name": "Azure Pact",
+      "projectTitle": "",
+      "category": "Clean and green technology ",
+      "registrationDate": "2025-09-12",
+      "isActive": true
     },
     {
-      id: 2,
-      name: "Team Beta",
-      members: ["Sneha Patel", "Rohit Verma", "Kavya Reddy"],
-      projectTitle: "AI-Powered Healthcare Diagnostic Tool",
-      category: "Healthcare",
-      registrationDate: "2025-01-16",
-      isActive: true
+      "id": 2,
+      "name": "Code Titans",
+      "projectTitle": "",
+      "category": "Clean & Green Technology",
+      "registrationDate": "2025-09-13",
+      "isActive": true
     },
     {
-      id: 3,
-      name: "Team Gamma",
-      members: ["Arjun Gupta", "Neha Joshi", "Vikram Yadav"],
-      projectTitle: "Sustainable Energy Management Platform",
-      category: "Clean Energy",
-      registrationDate: "2025-01-17",
-      isActive: true
+      "id": 3,
+      "name": "Ethno Tech",
+      "projectTitle": "",
+      "category": "Heritage & Culture",
+      "registrationDate": "2025-09-14",
+      "isActive": true
     },
     {
-      id: 4,
-      name: "Team Delta",
-      members: ["Riya Agarwal", "Karan Malhotra", "Deepika Soni"],
-      projectTitle: "EdTech Learning Analytics System",
-      category: "Education",
-      registrationDate: "2025-01-18",
-      isActive: true
+      "id": 4,
+      "name": "Team Swastik",
+      "projectTitle": "",
+      "category": "Heritage & Culture",
+      "registrationDate": "2025-09-15",
+      "isActive": true
     },
     {
-      id: 5,
-      name: "Team Epsilon",
-      members: ["Manish Tiwari", "Shweta Gupta", "Harsh Dubey"],
-      projectTitle: "Smart Agriculture Monitoring Solution",
-      category: "Agriculture",
-      registrationDate: "2025-01-19",
-      isActive: true
+      "id": 5,
+      "name": "VisionX",
+      "projectTitle": "",
+      "category": "Agriculture, FoodTech & Rural Development",
+      "registrationDate": "2025-09-16",
+      "isActive": true
+    },
+    {
+      "id": 6,
+      "name": "Team Sentinels",
+      "projectTitle": "",
+      "category": "Smart Automation",
+      "registrationDate": "2025-09-16",
+      "isActive": true
+    },
+    {
+      "id": 7,
+      "name": "Code Voyage ",
+      "projectTitle": "",
+      "category": "Miscellaneous",
+      "registrationDate": "2025-09-16",
+      "isActive": true
+    },
+    {
+      "id": 8,
+      "name": "TEAM SPAM",
+      "projectTitle": "",
+      "category": "Clean & Green Technology",
+      "registrationDate": "2025-09-16",
+      "isActive": true
+    },
+    {
+      "id": 9,
+      "name": "Heaxamind",
+      "projectTitle": "",
+      "category": "Travel and tourism ",
+      "registrationDate": "2025-09-16",
+      "isActive": true
+    },
+    {
+      "id": 10,
+      "name": "CodeX",
+      "projectTitle": "",
+      "category": "Fitness, Healthy Lifestyle and Promoting wellness",
+      "registrationDate": "2025-09-16",
+      "isActive": true
+    },
+    {
+      "id": 11,
+      "name": "AgroShield",
+      "projectTitle": "",
+      "category": "Agriculture, FoodTech & Rural Development",
+      "registrationDate": "2025-09-16",
+      "isActive": true
+    },
+    {
+      "id": 12,
+      "name": "Team TRACE",
+      "projectTitle": "",
+      "category": "Miscellaneous",
+      "registrationDate": "2025-09-16",
+      "isActive": true
+    },
+    {
+      "id": 13,
+      "name": " Team VedaC",
+      "projectTitle": "",
+      "category": "HealthTech",
+      "registrationDate": "2025-09-16",
+      "isActive": true
+    },
+    {
+      "id": 14,
+      "name": "TEAM SOIIL",
+      "projectTitle": "",
+      "category": "Agriculture, FoodTech & Rural Development",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 15,
+      "name": "VisionX",
+      "projectTitle": "",
+      "category": "Smart Automation",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 16,
+      "name": "DuneStack",
+      "projectTitle": "",
+      "category": "Miscellaneous",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 17,
+      "name": "ReNova",
+      "projectTitle": "",
+      "category": "Renewable / Sustainable Energy",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 18,
+      "name": "Tech Tutors",
+      "projectTitle": "",
+      "category": "Smart Education",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 19,
+      "name": "ReNova",
+      "projectTitle": "",
+      "category": "Renewable / Sustainable Energy",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 20,
+      "name": "TechnoNerve",
+      "projectTitle": "",
+      "category": "MedTech / BioTech / HealthTech",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 21,
+      "name": "Team Technotrons ",
+      "projectTitle": "",
+      "category": "Heritage & Culture ",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 22,
+      "name": "Team Soil and Soul",
+      "projectTitle": "",
+      "category": "Agriculture, FoodTech and Rural Development",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 23,
+      "name": "Codestorm ",
+      "projectTitle": "",
+      "category": "Smart Education & Awareness for Groundwater Conservation",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 24,
+      "name": "Slice of Code ",
+      "projectTitle": "",
+      "category": "Disaster Management",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 25,
+      "name": "Team LUMINA",
+      "projectTitle": "",
+      "category": "Agriculture, FoodTech & Rural Development",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 26,
+      "name": "HEXONIC",
+      "projectTitle": "",
+      "category": "Agriculture, Food tech and Rural development ",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 27,
+      "name": "SUSTAINOVA",
+      "projectTitle": "",
+      "category": "Smart Automation",
+      "registrationDate": "2025-09-18",
+      "isActive": true
+    },
+    {
+      "id": 28,
+      "name": "Fintech Phantom ",
+      "projectTitle": "",
+      "category": NaN,
+      "registrationDate": "2025-09-18",
+      "isActive": true
+    },
+    {
+      "id": 29,
+      "name": "HECShield",
+      "projectTitle": "",
+      "category": "“This problem aligns with the SIH themes of Environment & Clean/Green Technology and Disaster Management, focusing on the use of AI and IoT for real-time elephant movement detection to prevent Human-Elephant Conflict (HEC) in Chhattisgarh, ensuring both wildlife conservation and human safety.”",
+      "registrationDate": "2025-09-18",
+      "isActive": true
+    },
+    {
+      "id": 30,
+      "name": "WeighOUT",
+      "projectTitle": "",
+      "category": "Miscellaneous",
+      "registrationDate": "2025-09-18",
+      "isActive": true
+    },
+    {
+      "id": 31,
+      "name": "BUDGET YODHA",
+      "projectTitle": "",
+      "category": "Smart Automation",
+      "registrationDate": "2025-09-18",
+      "isActive": true
+    },
+    {
+      "id": 32,
+      "name": "Design dynamos",
+      "projectTitle": "",
+      "category": "Smart agricultural for sustainable future ",
+      "registrationDate": "2025-09-18",
+      "isActive": true
+    },
+    {
+      "id": 33,
+      "name": "E-Swasthya",
+      "projectTitle": "",
+      "category": "MedTech / BioTech / HealthTech",
+      "registrationDate": "2025-09-18",
+      "isActive": true
     }
-  ],
-
+  ], 
   // Evaluation Criteria Configuration
   evaluationCriteria: [
     { 
       id: 1,
-      name: "Innovation", 
-      maxMarks: 25,
-      description: "Originality and creativity of the solution",
-      weight: 25,
+      name: "Novelty of Idea/Solution", 
+      maxMarks: 10,
+      description: "",
+      weight: 20,
       isActive: true
     },
     { 
       id: 2,
-      name: "Feasibility", 
-      maxMarks: 20,
-      description: "Practicality and implementability of the solution",
+      name: "Technical Approach", 
+      maxMarks: 10,
+      description: "",
       weight: 20,
       isActive: true
     },
     { 
       id: 3,
-      name: "Presentation", 
-      maxMarks: 15,
-      description: "Quality of presentation and communication",
-      weight: 15,
+      name: "Feasibility and Viability", 
+      maxMarks: 10,
+      description: "",
+      weight: 20,
       isActive: true
     },
     { 
       id: 4,
-      name: "Impact", 
-      maxMarks: 20,
-      description: "Potential social and economic impact",
+      name: "Impact and Benefits", 
+      maxMarks: 10,
+      description: "",
       weight: 20,
       isActive: true
     },
     { 
       id: 5,
-      name: "Technical Quality", 
-      maxMarks: 20,
-      description: "Technical soundness and implementation quality",
+      name: "Presentation", 
+      maxMarks: 10,
+      description: "",
       weight: 20,
       isActive: true
     }
