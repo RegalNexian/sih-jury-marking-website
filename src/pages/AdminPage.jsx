@@ -6,21 +6,74 @@ import {
   getAllSubmissionStatus, 
   getConsolidatedMarksheet, 
   getLeaderboard,
-  resetAllEvaluations 
+  resetAllEvaluations,
+  initializeRealTimeSync
 } from '../utils/dataStorage';
 import { exportToExcel } from '../utils/excelExport';
 import { evaluationCriteria } from '../data/juryData';
 import { getJuryEvaluation } from '../utils/dataStorage';
+import { socketRealTimeSync } from '../utils/socketRealTimeSync.js';
 
 function AdminPage() {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [consolidatedData, setConsolidatedData] = useState(null);
   const [leaderboard, setLeaderboard] = useState(null);
+  const [realTimeStats, setRealTimeStats] = useState({
+    connectedClients: 0,
+    connectionStatus: 'disconnected',
+    lastUpdate: null
+  });
 
   // Load data on component mount
   useEffect(() => {
+    const handleRealTimeUpdate = (event) => {
+      console.log('📊 Real-time evaluation update received:', event.detail);
+      // Refresh data when remote updates arrive
+      loadData();
+    };
+
+    const handleRealTimeReset = (event) => {
+      console.log('🔄 Real-time reset received:', event.detail);
+      // Refresh data when remote reset occurs
+      loadData();
+    };
+
+    const setupRealTimeListeners = () => {
+      // Identify this client as admin
+      socketRealTimeSync.identifyAsAdmin();
+      
+      // Listen for connection status changes
+      socketRealTimeSync.onConnectionStatusChange((status) => {
+        setRealTimeStats(prev => ({
+          ...prev,
+          connectionStatus: status
+        }));
+      });
+      
+      // Listen for client count updates
+      socketRealTimeSync.onClientCountUpdate((data) => {
+        setRealTimeStats(prev => ({
+          ...prev,
+          connectedClients: data.count,
+          lastUpdate: data.timestamp
+        }));
+      });
+      
+      // Listen for evaluation updates from other devices
+      window.addEventListener('evaluationUpdated', handleRealTimeUpdate);
+      window.addEventListener('evaluationsReset', handleRealTimeReset);
+    };
+
     loadData();
+    initializeRealTimeSync();
+    setupRealTimeListeners();
+    
+    return () => {
+      // Cleanup listeners on unmount
+      window.removeEventListener('evaluationUpdated', handleRealTimeUpdate);
+      window.removeEventListener('evaluationsReset', handleRealTimeReset);
+    };
   }, []);
 
   const loadData = () => {
@@ -117,8 +170,18 @@ function AdminPage() {
   const handleResetData = () => {
     if (window.confirm('Are you sure you want to reset all evaluation data? This action cannot be undone.')) {
       resetAllEvaluations();
+      
+      // Broadcast reset action to all connected devices
+      if (socketRealTimeSync.isConnected()) {
+        socketRealTimeSync.broadcastAdminAction({
+          action: 'reset-evaluations',
+          timestamp: new Date().toISOString()
+        });
+        console.log('📡 Broadcast reset action to all devices');
+      }
+      
       loadData();
-      alert('All evaluation data has been reset.');
+      alert('All evaluation data has been reset and broadcasted to all connected devices.');
     }
   };
 
@@ -180,6 +243,47 @@ function AdminPage() {
       {/* Main Content */}
       <div className="flex-1 py-12 bg-gradient-to-b from-slate-50 to-white">
         <div className="container mx-auto px-4">
+          
+          {/* Real-time Status Bar */}
+          <div className="bg-white rounded-lg shadow-lg border border-gray-200 mb-6 p-4">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <div className={`w-3 h-3 rounded-full ${
+                    realTimeStats.connectionStatus === 'connected' ? 'bg-green-500' : 
+                    realTimeStats.connectionStatus === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}></div>
+                  <span className="text-sm font-medium text-gray-700">
+                    {realTimeStats.connectionStatus === 'connected' ? '🟢 Real-time Sync Active' : 
+                     realTimeStats.connectionStatus === 'connecting' ? '🟡 Connecting...' : '🔴 Disconnected'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">👥 Connected Devices:</span>
+                  <span className="text-sm font-bold text-blue-600">{realTimeStats.connectedClients}</span>
+                </div>
+                {realTimeStats.lastUpdate && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-600">🕒 Last Update:</span>
+                    <span className="text-xs text-gray-500">
+                      {new Date(realTimeStats.lastUpdate).toLocaleTimeString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={loadData}
+                  className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md font-medium transition-colors duration-200"
+                >
+                  🔄 Refresh Data
+                </button>
+                <div className="text-xs text-gray-500">
+                  Auto-refresh: {realTimeStats.connectionStatus === 'connected' ? 'ON' : 'OFF'}
+                </div>
+              </div>
+            </div>
+          </div>
           
           {/* Tab Navigation */}
           <div className="bg-white rounded-t-xl shadow-lg border-b border-gray-200 mb-0">

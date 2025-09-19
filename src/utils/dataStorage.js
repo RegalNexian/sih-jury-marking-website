@@ -1,6 +1,7 @@
 // Data Storage Utility for Jury Evaluations
 import { configManager } from '../config/hackathonConfig';
 import { juryProfiles, teams, evaluationCriteria } from '../data/juryData';
+import { socketRealTimeSync } from './socketRealTimeSync.js';
 
 const STORAGE_KEY = 'sih_jury_evaluations';
 
@@ -106,6 +107,8 @@ export const getAllEvaluations = () => {
 // Save jury evaluation (allows multiple saves/updates)
 export const saveJuryEvaluation = (juryId, scores) => {
   const data = getAllEvaluations();
+  const previousScores = data.evaluations[juryId]?.scores || {};
+  
   data.evaluations[juryId].scores = scores;
   data.evaluations[juryId].isSubmitted = true; // Mark as having data
   data.evaluations[juryId].submittedAt = new Date().toISOString();
@@ -113,6 +116,25 @@ export const saveJuryEvaluation = (juryId, scores) => {
   data.lastUpdated = new Date().toISOString();
   
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  
+  // Broadcast real-time update to other connected devices
+  if (socketRealTimeSync.isConnected()) {
+    const juryInfo = data.evaluations[juryId].juryInfo;
+    socketRealTimeSync.broadcastEvaluationUpdate({
+      juryId,
+      juryName: juryInfo?.name || `Jury ${juryId}`,
+      scores,
+      previousScores,
+      timestamp: data.evaluations[juryId].lastModified,
+      submittedAt: data.evaluations[juryId].submittedAt,
+      isSubmitted: data.evaluations[juryId].isSubmitted
+    });
+    
+    console.log('📡 Broadcast evaluation update for jury:', juryId);
+  } else {
+    console.warn('⚠️ Real-time sync not connected, update not broadcasted');
+  }
+  
   return data;
 };
 
@@ -288,4 +310,64 @@ export const cleanupCriteriaEvaluationData = (criteriaName) => {
 export const resetAllEvaluations = () => {
   localStorage.removeItem(STORAGE_KEY);
   return initializeStorage();
+};
+
+// Real-time sync handlers
+export const handleIncomingEvaluationUpdate = (updateData) => {
+  const { juryId, scores, timestamp } = updateData;
+  
+  // Get current data without triggering broadcasts
+  const data = getAllEvaluations();
+  
+  // Check if this update is newer than our local data
+  const localTimestamp = data.evaluations[juryId]?.lastModified;
+  if (localTimestamp && new Date(timestamp) <= new Date(localTimestamp)) {
+    console.log('📊 Ignoring older evaluation update for jury:', juryId);
+    return data;
+  }
+  
+  // Update local storage with received data
+  if (data.evaluations[juryId]) {
+    data.evaluations[juryId].scores = scores;
+    data.evaluations[juryId].isSubmitted = true;
+    data.evaluations[juryId].submittedAt = updateData.submittedAt;
+    data.evaluations[juryId].lastModified = timestamp;
+    data.lastUpdated = new Date().toISOString();
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    
+    console.log('📥 Applied remote evaluation update for jury:', juryId);
+    
+    // Trigger custom event for UI updates
+    window.dispatchEvent(new CustomEvent('evaluationUpdated', {
+      detail: { juryId, updateData, source: 'remote' }
+    }));
+  }
+  
+  return data;
+};
+
+// Initialize real-time sync when this module loads
+export const initializeRealTimeSync = () => {
+  if (typeof window !== 'undefined') {
+    // Initialize Socket.IO connection
+    socketRealTimeSync.initialize();
+    
+    // Set up event handlers
+    socketRealTimeSync.onEvaluationUpdate(handleIncomingEvaluationUpdate);
+    
+    // Handle admin actions
+    socketRealTimeSync.onAdminAction((actionData) => {
+      if (actionData.action === 'reset-evaluations') {
+        resetAllEvaluations();
+        
+        // Trigger custom event for UI updates
+        window.dispatchEvent(new CustomEvent('evaluationsReset', {
+          detail: { source: 'remote' }
+        }));
+      }
+    });
+    
+    console.log('🔄 Real-time sync initialized for data storage');
+  }
 };

@@ -7,14 +7,25 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "cd server && npm start",
+    "server:dev": "cd server && npm run dev",
+    "start:all": "concurrently \"npm run dev\" \"npm run server:dev\"",
+    "install:server": "cd server && npm install",
+    "build:production": "npm run build",
+    "deploy:render": "echo 'Deploy frontend to Vercel and server to Render - see RENDER_DEPLOYMENT.md'"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "file-saver": "^2.0.5",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.1",
-    "tailwindcss": "^3.4.17",
-    "xlsx": "^0.18.5"
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

@@ -4,18 +4,20 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import MarksheetTable from '../components/MarksheetTable';
 import { juryProfiles } from '../data/juryData';
-import { saveJuryEvaluation, getJuryEvaluation } from '../utils/dataStorage';
+import { saveJuryEvaluation, getJuryEvaluation, initializeRealTimeSync } from '../utils/dataStorage';
+import { socketRealTimeSync } from '../utils/socketRealTimeSync.js';
 
 function MarkingPage() {
   const { juryId } = useParams();
   const [scores, setScores] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const [realTimeStatus, setRealTimeStatus] = useState('disconnected');
 
   // Find jury information
   const jury = juryProfiles.find(j => j.id === parseInt(juryId));
 
-  // Load existing evaluation data
+  // Load existing evaluation data and setup real-time sync
   useEffect(() => {
     if (jury) {
       const existingEvaluation = getJuryEvaluation(parseInt(juryId));
@@ -23,8 +25,67 @@ function MarkingPage() {
         setScores(existingEvaluation.scores);
         setLastSaved(existingEvaluation.submittedAt);
       }
+      
+      // Initialize real-time sync
+      initializeRealTimeSync();
+      
+      // Identify as jury client
+      socketRealTimeSync.identifyAsJury(parseInt(juryId), jury.name);
+      
+      // Listen for connection status changes
+      socketRealTimeSync.onConnectionStatusChange((status) => {
+        setRealTimeStatus(status);
+      });
+      
+      // Listen for evaluation updates from other juries (admin actions)
+      const handleRealTimeUpdate = (event) => {
+        if (event.detail.source === 'remote') {
+          console.log('📊 Received real-time update for MarkingPage');
+          // Refresh data if needed
+          const refreshedEvaluation = getJuryEvaluation(parseInt(juryId));
+          if (refreshedEvaluation) {
+            setScores(refreshedEvaluation.scores);
+            setLastSaved(refreshedEvaluation.submittedAt);
+          }
+        }
+      };
+      
+      const handleRealTimeReset = () => {
+        console.log('🔄 Received real-time reset, clearing scores');
+        setScores({});
+        setLastSaved(null);
+      };
+      
+      window.addEventListener('evaluationUpdated', handleRealTimeUpdate);
+      window.addEventListener('evaluationsReset', handleRealTimeReset);
+      
+      return () => {
+        window.removeEventListener('evaluationUpdated', handleRealTimeUpdate);
+        window.removeEventListener('evaluationsReset', handleRealTimeReset);
+      };
     }
   }, [juryId, jury]);
+
+  // Handle auto-saving of scores
+  const handleAutoSave = async () => {
+    try {
+      await saveJuryEvaluation(parseInt(juryId), scores);
+      setLastSaved(new Date().toISOString());
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+    }
+  };
+
+  // Auto-save when scores change (debounced)
+  useEffect(() => {
+    if (Object.keys(scores).length > 0) {
+      const timeoutId = setTimeout(() => {
+        handleAutoSave();
+      }, 2000); // Auto-save after 2 seconds of inactivity
+      return () => clearTimeout(timeoutId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scores, juryId]);
 
   if (!jury) {
     return (
@@ -74,24 +135,6 @@ function MarkingPage() {
     }
   };
 
-  // Auto-save functionality
-  const handleAutoSave = async () => {
-    try {
-      await saveJuryEvaluation(parseInt(juryId), scores);
-      setLastSaved(new Date().toISOString());
-    } catch (error) {
-      console.error('Auto-save failed:', error);
-    }
-  };
-
-  // Auto-save when scores change (debounced)
-  useEffect(() => {
-    if (Object.keys(scores).length > 0) {
-      const timeoutId = setTimeout(handleAutoSave, 2000); // Auto-save after 2 seconds of inactivity
-      return () => clearTimeout(timeoutId);
-    }
-  }, [scores]);
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -124,6 +167,20 @@ function MarkingPage() {
                 >
                   ← BACK TO PANEL
                 </Link>
+                
+                {/* Real-time Status Indicator */}
+                <div className="text-xs text-gray-300 bg-white/10 px-3 py-2 rounded-lg backdrop-blur-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-2 h-2 rounded-full ${
+                      realTimeStatus === 'connected' ? 'bg-green-400' : 
+                      realTimeStatus === 'connecting' ? 'bg-yellow-400' : 'bg-red-400'
+                    }`}></div>
+                    <span>
+                      {realTimeStatus === 'connected' ? 'Live Sync' : 
+                       realTimeStatus === 'connecting' ? 'Connecting...' : 'Offline'}
+                    </span>
+                  </div>
+                </div>
                 
                 {/* Save Status Indicator */}
                 {lastSaved && (
