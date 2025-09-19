@@ -15,23 +15,23 @@ export default defineConfig({
           'excel-vendor': ['exceljs', 'file-saver'],
           // Group utility functions
           'utils': [
-            './src/utils/dataStorage.js',
-            './src/utils/excelExport.js'
+            './src/shared/utils/dataStorage.js',
+            './src/shared/utils/excelExport.js'
           ],
           // Group configuration and data
           'config-data': [
-            './src/config/hackathonConfig.js',
-            './src/data/juryData.js'
+            './src/core/config/hackathonConfig.js',
+            './src/core/config/juryData.js'
           ],
           // Group hooks
           'hooks': [
-            './src/hooks/useDebounce.js',
-            './src/hooks/useFormValidation.jsx',
-            './src/hooks/usePWA.js',
-            './src/hooks/useVirtualization.js',
-            './src/hooks/usePerformance.jsx',
-            './src/hooks/useIntersectionObserver.js',
-            './src/hooks/useMemoryManagement.js'
+            './src/shared/hooks/useDebounce.js',
+            './src/shared/hooks/useFormValidation.jsx',
+            './src/shared/hooks/usePWA.js',
+            './src/shared/hooks/useVirtualization.js',
+            './src/shared/hooks/usePerformance.jsx',
+            './src/shared/hooks/useIntersectionObserver.js',
+            './src/shared/hooks/useMemoryManagement.js'
           ]
         },
         // Optimize asset naming for better caching

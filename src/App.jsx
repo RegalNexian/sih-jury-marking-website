@@ -1,16 +1,17 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { useEffect, Suspense, lazy } from 'react'
-import ErrorBoundary from './components/ErrorBoundary'
-import { registerServiceWorker, usePWA } from './hooks/usePWA'
-import OfflineIndicator from './components/OfflineIndicator'
-import { PageLoading } from './components/LoadingComponents'
-import { addResourceHints } from './utils/performanceOptimizations'
+import ErrorBoundary from './shared/components/ui/ErrorBoundary'
+import { registerServiceWorker, usePWA } from './shared/hooks/usePWA'
+import OfflineIndicator from './shared/components/ui/OfflineIndicator'
+import { PageLoading } from './shared/components/ui/LoadingComponents'
+import { addResourceHints } from './shared/utils/performanceOptimizations'
 
 // Lazy load pages for code splitting
-const Homepage = lazy(() => import('./pages/Homepage'))
-const MarkingPage = lazy(() => import('./pages/MarkingPage'))
-const AdminPage = lazy(() => import('./pages/AdminPage'))
-const ConfigPage = lazy(() => import('./pages/ConfigPage'))
+const Homepage = lazy(() => import('./app/Homepage'))
+const MarkingPage = lazy(() => import('./features/evaluation/MarkingPage'))
+const AdminPage = lazy(() => import('./features/administration/AdminPage'))
+const ConfigPage = lazy(() => import('./features/configuration/ConfigPage'))
+const TestPage = lazy(() => import('./pages/TestPage'))
 
 function App() {
   const { isOnline } = usePWA();
@@ -34,6 +35,7 @@ function App() {
               <Route path="/marking/:juryId" element={<MarkingPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/config" element={<ConfigPage />} />
+              <Route path="/test" element={<TestPage />} />
             </Routes>
           </Suspense>
         </div>
