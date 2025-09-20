@@ -349,10 +349,6 @@ function AdminPage() {
                               </div>
                               <div>
                                 <h3 className="text-xl font-bold">{team.name}</h3>
-                                <p className="text-sm opacity-90">{team.projectTitle}</p>
-                                <p className="text-xs opacity-80 mt-1">
-                                  {team.members.join(', ')}
-                                </p>
                               </div>
                             </div>
                             

@@ -76,9 +76,6 @@ function MarksheetTable({ onScoreChange, initialScores = {} }) {
             <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider border-b-2 border-orange-500">
               📊 TEAM
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider border-b-2 border-orange-500">
-              📁 PROJECT
-            </th>
             {evaluationCriteria.map(criteria => (
               <th key={criteria.name} className="px-4 py-4 text-center text-xs font-bold text-white uppercase tracking-wider border-b-2 border-orange-500">
                 ⭐ {criteria.name}
@@ -103,14 +100,8 @@ function MarksheetTable({ onScoreChange, initialScores = {} }) {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-slate-900 tracking-wide">{team.name}</div>
-                    <div className="text-xs text-slate-600">
-                      {(team.members || []).join(', ') || 'No members listed'}
-                    </div>
                   </div>
                 </div>
-              </td>
-              <td className="px-6 py-4">
-                <div className="text-sm text-slate-800 font-medium leading-tight">{team.projectTitle}</div>
               </td>
               {evaluationCriteria.map(criteria => (
                 <td key={criteria.name} className="px-4 py-4 text-center">
