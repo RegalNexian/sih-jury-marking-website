@@ -1,4 +1,4 @@
-import XlsxPopulate from 'xlsx-populate';
+import XlsxPopulate from 'xlsx-populate/browser/xlsx-populate';
 import { teams, evaluationCriteria, juryProfiles } from '../data/juryData';
 
 export const exportToExcel = (data, identifier) => {
@@ -9,14 +9,29 @@ export const exportToExcel = (data, identifier) => {
     ? `SIH_Consolidated_Marksheet_${timestamp}.xlsx`
     : `SIH_Marksheet_${(jury?.name || `Jury_${identifier}`).replace(/\s+/g, '_')}_${timestamp}.xlsx`;
 
+  const handleResult = (arrayBufferPromise) =>
+    arrayBufferPromise
+      .then((arrayBuffer) => {
+        const blob = new Blob([arrayBuffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        triggerDownload(blob, filename);
+      })
+      .catch((error) => {
+        console.error('Excel export failed:', error);
+        window.alert('Unable to generate the spreadsheet. Please try again.');
+      });
+
   if (data.consolidated) {
-    createConsolidatedWorkbook(data).then((blob) => triggerDownload(blob, filename));
+    handleResult(createConsolidatedWorkbook(data));
   } else {
     const workbookData = data.scores || data;
-    createIndividualWorkbook(workbookData, {
-      jury,
-      submittedAt: data.submittedAt
-    }).then((blob) => triggerDownload(blob, filename));
+    handleResult(
+      createIndividualWorkbook(workbookData, {
+        jury,
+        submittedAt: data.submittedAt
+      })
+    );
   }
 };
 
