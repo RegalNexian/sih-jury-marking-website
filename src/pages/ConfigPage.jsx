@@ -32,7 +32,7 @@ function ConfigPage() {
           to="/admin"
           className="inline-flex items-center gap-2 rounded-xl border border-orange-400/30 bg-orange-500/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-orange-200 transition hover:text-white"
         >
-          ? Back to admin
+            Back to admin
         </Link>
       ]}
     />

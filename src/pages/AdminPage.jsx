@@ -16,11 +16,11 @@ const ADMIN_PASSWORD = 'S1H@2025';
 const SESSION_DURATION = 24 * 60 * 60 * 1000;
 
 const TABS = [
-  { id: 'overview', label: '?? Overview' },
-  { id: 'realtime', label: '?? Realtime' },
-  { id: 'leaderboard', label: '?? Leaderboard' },
-  { id: 'consolidated', label: '?? Consolidated' },
-  { id: 'settings', label: '?? Settings' }
+  { id: 'overview', label: ' Overview' },
+  { id: 'realtime', label: ' Realtime' },
+  { id: 'leaderboard', label: ' Leaderboard' },
+  { id: 'consolidated', label: ' Consolidated' },
+  { id: 'settings', label: ' Settings' }
 ];
 
 function AdminPage() {
@@ -43,7 +43,7 @@ function AdminPage() {
           to="/"
           className="inline-flex items-center gap-2 rounded-xl border border-orange-400/30 bg-orange-500/10 px-4 py-2 text-orange-200/80 transition hover:text-white"
         >
-          ? Back to home
+            Back to home
         </Link>
       ]}
     />
@@ -75,7 +75,7 @@ function AdminPage() {
           to="/"
           className="inline-flex items-center gap-2 rounded-xl border border-orange-400/30 bg-orange-500/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-orange-200 transition hover:text-white"
         >
-          ? Back to home
+           Back to home
         </Link>
       ]}
     />
