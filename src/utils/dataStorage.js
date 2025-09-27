@@ -24,6 +24,8 @@ const initializeStorage = () => {
       initialData.evaluations[jury.id] = {
         juryInfo: jury,
         scores: {},
+        notes: {},
+        exportHistory: [],
         submittedAt: null,
         isSubmitted: false
       };
@@ -31,6 +33,7 @@ const initializeStorage = () => {
       // Initialize empty scores for each active team
       currentTeams.forEach(team => {
         initialData.evaluations[jury.id].scores[team.id] = {};
+        initialData.evaluations[jury.id].notes[team.id] = '';
         currentCriteria.forEach(criteria => {
           initialData.evaluations[jury.id].scores[team.id][criteria.name] = 0;
         });
@@ -76,6 +79,8 @@ const updateStorageForNewConfig = (existingData) => {
     newEvaluations[jury.id] = {
       juryInfo: jury,
       scores: {},
+      notes: existingJuryData?.notes ? { ...existingJuryData.notes } : {},
+      exportHistory: existingJuryData?.exportHistory ? [...existingJuryData.exportHistory] : [],
       submittedAt: existingJuryData?.submittedAt || null,
       isSubmitted: existingJuryData?.isSubmitted || false
     };
@@ -83,7 +88,10 @@ const updateStorageForNewConfig = (existingData) => {
     // Update team scores structure
     currentTeams.forEach(team => {
       newEvaluations[jury.id].scores[team.id] = {};
-      
+      if (!newEvaluations[jury.id].notes[team.id]) {
+        newEvaluations[jury.id].notes[team.id] = '';
+      }
+
       currentCriteria.forEach(criteria => {
         // Preserve existing score if it exists
         const existingScore = existingJuryData?.scores?.[team.id]?.[criteria.name];
@@ -104,12 +112,43 @@ export const getAllEvaluations = () => {
 };
 
 // Save jury evaluation (allows multiple saves/updates)
-export const saveJuryEvaluation = (juryId, scores) => {
+export const saveJuryEvaluation = (juryId, payload) => {
   const data = getAllEvaluations();
-  data.evaluations[juryId].scores = scores;
-  data.evaluations[juryId].isSubmitted = true; // Mark as having data
-  data.evaluations[juryId].submittedAt = new Date().toISOString();
-  data.evaluations[juryId].lastModified = new Date().toISOString();
+  const evaluation = data.evaluations[juryId] || {
+    juryInfo: null,
+    scores: {},
+    notes: {},
+    exportHistory: [],
+    isSubmitted: false,
+    submittedAt: null
+  };
+
+  const update = payload && typeof payload === 'object' && !Array.isArray(payload) && (
+    Object.prototype.hasOwnProperty.call(payload, 'scores') ||
+    Object.prototype.hasOwnProperty.call(payload, 'notes') ||
+    Object.prototype.hasOwnProperty.call(payload, 'exportHistory')
+  )
+    ? payload
+    : { scores: payload };
+
+  if (update.scores) {
+    evaluation.scores = update.scores;
+  }
+  if (update.notes) {
+    evaluation.notes = update.notes;
+  } else if (!evaluation.notes) {
+    evaluation.notes = {};
+  }
+  if (update.exportHistory) {
+    evaluation.exportHistory = update.exportHistory;
+  } else if (!evaluation.exportHistory) {
+    evaluation.exportHistory = [];
+  }
+
+  evaluation.isSubmitted = true; // Mark as having data
+  evaluation.submittedAt = new Date().toISOString();
+  evaluation.lastModified = new Date().toISOString();
+  data.evaluations[juryId] = evaluation;
   data.lastUpdated = new Date().toISOString();
   
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -119,7 +158,13 @@ export const saveJuryEvaluation = (juryId, scores) => {
 // Get specific jury evaluation
 export const getJuryEvaluation = (juryId) => {
   const data = getAllEvaluations();
-  return data.evaluations[juryId] || null;
+  const evaluation = data.evaluations[juryId];
+  if (!evaluation) return null;
+  return {
+    ...evaluation,
+    notes: evaluation.notes || {},
+    exportHistory: evaluation.exportHistory || []
+  };
 };
 
 // Get consolidated marksheet (all juries combined)
@@ -200,10 +245,12 @@ export const getConsolidatedMarksheet = () => {
 // Get leaderboard (top 10)
 export const getLeaderboard = () => {
   const consolidated = getConsolidatedMarksheet();
+  const orderedTeams = [...consolidated.teams].sort((a, b) => parseFloat(b.averageScore) - parseFloat(a.averageScore));
   return {
-    topTeams: consolidated.teams.slice(0, 10),
+    teams: orderedTeams,
+    topTeams: orderedTeams.slice(0, 10),
     generatedAt: consolidated.generatedAt,
-    totalTeams: consolidated.teams.length
+    totalTeams: orderedTeams.length
   };
 };
 

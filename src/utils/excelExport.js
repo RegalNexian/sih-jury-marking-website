@@ -10,9 +10,14 @@ export const exportToExcel = (data, identifier) => {
     workbook = createConsolidatedWorkbook(data);
     filename = `SIH_Consolidated_Marksheet_${timestamp}.xlsx`;
   } else {
-    // Handle individual jury export (legacy support)
-    workbook = createIndividualWorkbook(data, identifier);
-    const jury = juryProfiles.find(j => j.id === parseInt(identifier));
+    // Handle individual jury export
+    const juryId = parseInt(identifier, 10);
+    const jury = data.jury || juryProfiles.find((j) => j.id === juryId);
+    const workbookData = data.scores || data;
+    workbook = createIndividualWorkbook(workbookData, {
+      jury,
+      submittedAt: data.submittedAt
+    });
     const juryName = jury ? jury.name : `Jury_${identifier}`;
     filename = `SIH_Marksheet_${juryName.replace(/\s+/g, '_')}_${timestamp}.xlsx`;
   }
@@ -111,36 +116,43 @@ const createConsolidatedWorkbook = (data) => {
 };
 
 // Create individual jury workbook (legacy support)
-const createIndividualWorkbook = (scores, juryId) => {
-  const jury = juryProfiles.find(j => j.id === parseInt(juryId));
-  const rawJuryName = jury ? jury.name : `Jury ${juryId}`;
+const createIndividualWorkbook = (scores, meta = {}) => {
+  const juryId = meta.jury?.id ?? null;
+  const rawJuryName = meta.jury?.name || (juryId ? `Jury ${juryId}` : 'Jury');
   const sheetName = rawJuryName.length > 31 ? `${rawJuryName.slice(0, 28)}...` : rawJuryName;
 
-  const data = [
+  const header = [
+    ['Individual Evaluation Summary'],
+    ['Evaluator', rawJuryName],
+    ['Jury ID', juryId ?? '—'],
+    ['Last Submitted', meta.submittedAt ? new Date(meta.submittedAt).toLocaleString() : 'Not available'],
+    ['Exported', new Date().toLocaleString()],
+    [''],
     ['Team Name', 'Project Title', 'Members', ...evaluationCriteria.map(c => `${c.name} (${c.maxMarks})`), `Total (${evaluationCriteria.reduce((sum, c) => sum + c.maxMarks, 0)})`]
   ];
 
-  teams.forEach(team => {
+  const rows = teams.map((team) => {
     const teamScores = scores[team.id] || {};
-    const total = evaluationCriteria.reduce((sum, criteria) => {
-      return sum + (teamScores[criteria.name] || 0);
-    }, 0);
-
-    data.push([
+    const total = evaluationCriteria.reduce((sum, criteria) => sum + (teamScores[criteria.name] || 0), 0);
+    return [
       team.name,
       team.projectTitle,
       (team.members || []).join(', ') || 'No members listed',
-      ...evaluationCriteria.map(criteria => teamScores[criteria.name] || 0),
+      ...evaluationCriteria.map((criteria) => teamScores[criteria.name] || 0),
       total
-    ]);
+    ];
   });
+
+  const data = [...header, ...rows];
 
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.aoa_to_sheet(data);
   worksheet['!cols'] = [
-    { width: 15 }, { width: 30 }, { width: 40 },
+    { width: 18 },
+    { width: 30 },
+    { width: 40 },
     ...evaluationCriteria.map(() => ({ width: 12 })),
-    { width: 10 }
+    { width: 12 }
   ];
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 

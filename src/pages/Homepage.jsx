@@ -1,82 +1,86 @@
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import JuryCard from '../components/JuryCard';
 import { configManager } from '../config/hackathonConfig';
 import { juryProfiles } from '../data/juryData';
+import PageLayout from '../components/layout/PageLayout';
+import HeroHeader from '../components/ui/HeroHeader';
+import StatCard from '../components/ui/StatCard';
 
 function Homepage() {
+  const ADMIN_CREDENTIALS = {
+    id: 'jury-admin',
+    password: 'S1H@2025'
+  };
   const sessionInfo = configManager.getSessionInfo();
   
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-16 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent"></div>
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="inline-block p-4 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10 mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight bg-gradient-to-r from-white to-orange-200 bg-clip-text text-transparent">
-              {sessionInfo.title}
-            </h1>
-            <p className="text-lg mb-2 text-gray-300 font-medium">
-              {sessionInfo.subtitle}
-            </p>
-            <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-orange-600 mx-auto mb-4"></div>
-            <p className="text-xl mb-2 text-orange-400 font-semibold tracking-wider">
-              JURY EVALUATION PLATFORM
-            </p>
-          </div>
-          <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed mb-2">
-            Professional jury marking system designed for competitive evaluation.
-            Select your panel profile to begin comprehensive team assessment.
-          </p>
-          <p className="text-orange-300 text-sm font-semibold tracking-wide">
-            {sessionInfo.organization}
-          </p>
-        </div>
-      </div>
+  const hero = (
+    <HeroHeader
+      eyebrow="Smart India Hackathon"
+      title={sessionInfo.title}
+      subtitle={sessionInfo.subtitle}
+      description="Professional jury marking system for real-time evaluation, transparent scoring, and effortless coordination across devices."
+      actions={[
+        <Link
+          key="admin"
+          to="/admin"
+          state={ADMIN_CREDENTIALS}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-semibold shadow-lg shadow-orange-500/40"
+        >
+          Admin access
+        </Link>,
+        <a
+          key="panels"
+          href="#jury-panels"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-orange-400/30 bg-orange-500/10 text-orange-200/80 hover:text-white transition"
+        >
+          View judge panels
+        </a>
+      ]}
+      kicker={sessionInfo.organization}
+    />
+  );
 
-      {/* Jury Profiles Section */}
-      <div className="flex-1 py-16 bg-gradient-to-b from-slate-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-800 mb-4 tracking-wide">
-              🏆 EVALUATION PANEL
-            </h2>
-            <div className="w-20 h-1 bg-gradient-to-r from-orange-500 to-orange-600 mx-auto mb-4"></div>
-            <p className="text-slate-600 max-w-lg mx-auto">
-              Expert jury members ready to evaluate innovation, technical excellence, and competitive solutions.
+  const stats = [
+    { title: 'Active Judges', value: configManager.getActiveJuryMembers().length, helper: 'Ready to evaluate', accent: 'bg-emerald-400' },
+    { title: 'Evaluation Criteria', value: configManager.getActiveEvaluationCriteria().length, helper: 'Customizable rubric', accent: 'bg-blue-400' },
+    { title: 'Teams Participating', value: configManager.getActiveTeams().length, helper: 'Awaiting assessments', accent: 'bg-purple-400' }
+  ];
+
+  return (
+    <PageLayout hero={hero}>
+      <section className="container mx-auto px-4 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-12">
+          {stats.map((stat) => (
+            <StatCard key={stat.title} {...stat} />
+          ))}
+        </div>
+
+        <div className="space-y-12">
+          <div id="jury-panels" className="text-center max-w-3xl mx-auto">
+            <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-slate-900 border border-orange-500/30 text-orange-300 text-xs font-semibold uppercase tracking-[0.2em]">
+              Evaluation panel
+            </span>
+            <h2 className="text-4xl font-semibold text-white mt-4 mb-3">Meet the judges</h2>
+            <p className="text-slate-400 text-sm sm:text-base">
+              Expert jury members ready to evaluate innovation, technical excellence, and execution across every team submission.
             </p>
           </div>
-          
+
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {juryProfiles.map((jury) => (
                 <JuryCard key={jury.id} jury={jury} />
               ))}
             </div>
-            
-            {/* Admin Access */}
-            <div className="mt-12 text-center">
-              <div className="inline-block p-4 bg-slate-100 rounded-lg border border-slate-200">
-                <p className="text-slate-600 text-sm mb-3 font-medium">System Administrator Access</p>
-                <Link
-                  to="/admin"
-                  className="inline-block bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-3 font-bold tracking-wider text-sm hover:from-orange-500 hover:to-orange-600 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                >
-                  👨‍💼 ADMIN DASHBOARD
-                </Link>
-              </div>
-            </div>
+          </div>
+
+          <div className="rounded-2xl bg-slate-900 border border-slate-700/60 p-6 shadow-xl shadow-slate-950/50 text-center">
+            <h3 className="text-lg font-semibold text-slate-100 mb-2">Need administrative access?</h3>
+            <p className="text-sm text-slate-400">Administrative tools are managed by the organizing committee. Please contact the event lead for credentials or updates.</p>
           </div>
         </div>
-      </div>
-
-      <Footer />
-    </div>
+      </section>
+    </PageLayout>
   );
 }
 

@@ -1,34 +1,37 @@
 import { Link } from 'react-router-dom';
 
 function JuryCard({ jury }) {
+  const initials = jury.name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-200 hover:border-orange-400 relative overflow-hidden group">
-      {/* 3D Shadow Effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      
-      {/* Orange Accent Bar */}
-      <div className="h-1 bg-gradient-to-r from-orange-500 to-orange-600 w-full"></div>
-      
-      <div className="p-6 relative z-10">
-        {/* Initials Badge */}
-        <div className="w-16 h-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg flex items-center justify-center mx-auto mb-4 shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-          <span className="text-white font-bold text-xl tracking-wide">{jury.name.split(' ').map(n => n[0]).join('')}</span>
+    <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/80 shadow-xl shadow-slate-950/40 transition duration-300 hover:-translate-y-1 hover:border-orange-400">
+      <div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(251,146,60,0.18),_transparent_65%)] opacity-0 transition-opacity duration-300 hover:opacity-100"
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 p-6">
+        <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-2xl bg-slate-800 text-lg font-semibold text-orange-200 shadow-lg shadow-orange-500/20">
+          {initials}
         </div>
-        
-        {/* Jury Info */}
+
         <div className="text-center space-y-2">
-          <h3 className="text-lg font-bold text-slate-800 tracking-wide group-hover:text-slate-900 transition-colors">{jury.name}</h3>
-          <p className="text-slate-600 text-sm font-medium">{jury.designation}</p>
-          <p className="text-orange-600 text-xs font-bold uppercase tracking-wider">{jury.department}</p>
+          <h3 className="text-lg font-semibold text-white tracking-wide">{jury.name}</h3>
+          <p className="text-sm text-slate-400">{jury.designation}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-300">{jury.department}</p>
         </div>
-        
-        {/* Action Button */}
+
         <div className="mt-6">
           <Link
             to={`/marking/${jury.id}`}
-            className="block w-full bg-gradient-to-r from-slate-800 to-slate-900 text-white py-3 px-4 font-bold tracking-wider text-sm hover:from-orange-500 hover:to-orange-600 transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="block w-full rounded-xl border border-orange-400/30 bg-orange-500/10 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-orange-200 transition hover:bg-orange-500/20"
           >
-            ⚡ START EVALUATION
+            Start evaluation
           </Link>
         </div>
       </div>
