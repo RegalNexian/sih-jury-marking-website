@@ -100,6 +100,9 @@ function MarksheetTable({ onScoreChange, initialScores = {} }) {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-slate-900 tracking-wide">{team.name}</div>
+                    <div className="text-xs text-slate-600">
+                      {(team.members || []).join(', ') || 'No members listed'}
+                    </div>
                   </div>
                 </div>
               </td>

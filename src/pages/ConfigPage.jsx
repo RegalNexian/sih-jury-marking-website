@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -15,7 +15,6 @@ function ConfigPage() {
   const [juryMembers, setJuryMembers] = useState(hackathonConfig.juryMembers);
   const [teams, setTeams] = useState(hackathonConfig.teams);
   const [evaluationCriteria, setEvaluationCriteria] = useState(hackathonConfig.evaluationCriteria);
-  const [isEditing, setIsEditing] = useState(null);
   const [showAddForm, setShowAddForm] = useState(null);
 
   // Form states for adding new items
@@ -229,8 +228,8 @@ function ConfigPage() {
           } else {
             alert('Invalid configuration file format.');
           }
-        } catch (error) {
-          alert('Error reading configuration file.');
+        } catch (err) {
+          alert(`Error reading configuration file: ${err.message || 'Unknown error'}`);
         }
       };
       reader.readAsText(file);

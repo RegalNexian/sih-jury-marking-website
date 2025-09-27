@@ -100,7 +100,7 @@ export const hackathonConfig = {
     },
     {
       "id": 5,
-      "name": "VisionX (Tl :Pallabi)",
+      "name": "VisionX",
       "projectTitle": "",
       "category": "Agriculture, FoodTech & Rural Development",
       "registrationDate": "2025-09-16",
@@ -180,7 +180,7 @@ export const hackathonConfig = {
     },
     {
       "id": 15,
-      "name": "VisionX (TL: Asutosh)",
+      "name": "VisionX",
       "projectTitle": "",
       "category": "Smart Automation",
       "registrationDate": "2025-09-17",
@@ -210,9 +210,16 @@ export const hackathonConfig = {
       "registrationDate": "2025-09-17",
       "isActive": true
     },
-    
     {
       "id": 19,
+      "name": "ReNova",
+      "projectTitle": "",
+      "category": "Renewable / Sustainable Energy",
+      "registrationDate": "2025-09-17",
+      "isActive": true
+    },
+    {
+      "id": 20,
       "name": "TechnoNerve",
       "projectTitle": "",
       "category": "MedTech / BioTech / HealthTech",
@@ -220,7 +227,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 20,
+      "id": 21,
       "name": "Team Technotrons ",
       "projectTitle": "",
       "category": "Heritage & Culture ",
@@ -228,7 +235,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 21,
+      "id": 22,
       "name": "Team Soil and Soul",
       "projectTitle": "",
       "category": "Agriculture, FoodTech and Rural Development",
@@ -236,7 +243,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 22,
+      "id": 23,
       "name": "Codestorm ",
       "projectTitle": "",
       "category": "Smart Education & Awareness for Groundwater Conservation",
@@ -244,7 +251,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 23,
+      "id": 24,
       "name": "Slice of Code ",
       "projectTitle": "",
       "category": "Disaster Management",
@@ -252,7 +259,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 24,
+      "id": 25,
       "name": "Team LUMINA",
       "projectTitle": "",
       "category": "Agriculture, FoodTech & Rural Development",
@@ -260,7 +267,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 25,
+      "id": 26,
       "name": "HEXONIC",
       "projectTitle": "",
       "category": "Agriculture, Food tech and Rural development ",
@@ -268,7 +275,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 26,
+      "id": 27,
       "name": "SUSTAINOVA",
       "projectTitle": "",
       "category": "Smart Automation",
@@ -276,7 +283,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 27,
+      "id": 28,
       "name": "Fintech Phantom ",
       "projectTitle": "",
       "category": NaN,
@@ -284,7 +291,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 28,
+      "id": 29,
       "name": "HECShield",
       "projectTitle": "",
       "category": "“This problem aligns with the SIH themes of Environment & Clean/Green Technology and Disaster Management, focusing on the use of AI and IoT for real-time elephant movement detection to prevent Human-Elephant Conflict (HEC) in Chhattisgarh, ensuring both wildlife conservation and human safety.”",
@@ -292,7 +299,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 29,
+      "id": 30,
       "name": "WeighOUT",
       "projectTitle": "",
       "category": "Miscellaneous",
@@ -300,7 +307,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 30,
+      "id": 31,
       "name": "BUDGET YODHA",
       "projectTitle": "",
       "category": "Smart Automation",
@@ -308,7 +315,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 31,
+      "id": 32,
       "name": "Design dynamos",
       "projectTitle": "",
       "category": "Smart agricultural for sustainable future ",
@@ -316,7 +323,7 @@ export const hackathonConfig = {
       "isActive": true
     },
     {
-      "id": 32,
+      "id": 33,
       "name": "E-Swasthya",
       "projectTitle": "",
       "category": "MedTech / BioTech / HealthTech",

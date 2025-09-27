@@ -1,16 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import MarksheetTable from '../components/MarksheetTable';
 import { juryProfiles } from '../data/juryData';
 import { saveJuryEvaluation, getJuryEvaluation } from '../utils/dataStorage';
+import { useRealtimeScores, CONNECTION_STATUS } from '../hooks/useRealtimeScores';
 
 function MarkingPage() {
   const { juryId } = useParams();
   const [scores, setScores] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const remoteUpdateRef = useRef(false);
 
   // Find jury information
   const jury = juryProfiles.find(j => j.id === parseInt(juryId));
@@ -29,6 +31,25 @@ function MarkingPage() {
   const handleScoreChange = (newScores) => {
     setScores(newScores);
   };
+
+  const handleRemoteScores = useCallback((incomingScores) => {
+    remoteUpdateRef.current = true;
+    setScores(prev => {
+      const merged = { ...prev };
+      Object.entries(incomingScores || {}).forEach(([teamId, criteriaScores]) => {
+        merged[teamId] = {
+          ...(merged[teamId] || {}),
+          ...(criteriaScores || {})
+        };
+      });
+      return merged;
+    });
+  }, []);
+
+  const { connectionState, lastAck, lastSync, broadcastScores } = useRealtimeScores({
+    juryId: parseInt(juryId),
+    onRemoteUpdate: handleRemoteScores
+  });
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -65,6 +86,45 @@ function MarkingPage() {
       return () => clearTimeout(timeoutId);
     }
   }, [scores, handleAutoSave]);
+
+  useEffect(() => {
+    if (remoteUpdateRef.current) {
+      remoteUpdateRef.current = false;
+      return;
+    }
+    if (connectionState !== CONNECTION_STATUS.CONNECTED) {
+      return;
+    }
+    if (Object.keys(scores).length === 0) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      broadcastScores(scores);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [scores, broadcastScores, connectionState]);
+
+  const connectionMeta = {
+    [CONNECTION_STATUS.CONNECTED]: {
+      label: 'Live sync active',
+      dot: 'bg-green-400',
+      text: 'text-green-200'
+    },
+    [CONNECTION_STATUS.CONNECTING]: {
+      label: 'Connecting…',
+      dot: 'bg-amber-400',
+      text: 'text-amber-200'
+    },
+    [CONNECTION_STATUS.DISCONNECTED]: {
+      label: 'Offline mode',
+      dot: 'bg-red-400',
+      text: 'text-red-200'
+    }
+  };
+
+  const currentConnection = connectionMeta[connectionState] || connectionMeta[CONNECTION_STATUS.DISCONNECTED];
 
   if (!jury) {
     return (
@@ -137,6 +197,18 @@ function MarkingPage() {
                     </div>
                   </div>
                 )}
+
+                <div className={`text-xs px-3 py-2 rounded-lg border border-white/10 backdrop-blur-sm ${currentConnection.text}`}>
+                  <div className="flex items-center space-x-2">
+                    <span className={`h-2 w-2 rounded-full ${currentConnection.dot}`}></span>
+                    <span>{currentConnection.label}</span>
+                  </div>
+                  {(lastAck || lastSync) && (
+                    <div className="text-[10px] text-gray-300 mt-1">
+                      Synced at: {new Date(lastAck || lastSync).toLocaleTimeString()}
+                    </div>
+                  )}
+                </div>
                 
                 <button
                   onClick={handleSave}

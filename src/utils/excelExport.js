@@ -11,7 +11,7 @@ export const exportToExcel = (data, identifier) => {
     filename = `SIH_Consolidated_Marksheet_${timestamp}.xlsx`;
   } else {
     // Handle individual jury export (legacy support)
-    workbook = createIndividualWorkbook(data);
+    workbook = createIndividualWorkbook(data, identifier);
     const jury = juryProfiles.find(j => j.id === parseInt(identifier));
     const juryName = jury ? jury.name : `Jury_${identifier}`;
     filename = `SIH_Marksheet_${juryName.replace(/\s+/g, '_')}_${timestamp}.xlsx`;
@@ -51,7 +51,7 @@ const createConsolidatedWorkbook = (data) => {
 
   // Detailed Sheet with all jury scores
   const detailedHeaders = [
-    'Rank', 'Team Name'
+    'Rank', 'Team Name', 'Project Title', 'Members'
   ];
   
   // Add criteria average columns
@@ -74,7 +74,9 @@ const createConsolidatedWorkbook = (data) => {
   data.teams.forEach((team, index) => {
     const row = [
       index + 1,
-      team.name
+      team.name,
+      team.projectTitle,
+      (team.members || []).join(', ') || 'No members listed'
     ];
     
     // Add criteria averages
@@ -109,9 +111,13 @@ const createConsolidatedWorkbook = (data) => {
 };
 
 // Create individual jury workbook (legacy support)
-const createIndividualWorkbook = (scores) => {
+const createIndividualWorkbook = (scores, juryId) => {
+  const jury = juryProfiles.find(j => j.id === parseInt(juryId));
+  const rawJuryName = jury ? jury.name : `Jury ${juryId}`;
+  const sheetName = rawJuryName.length > 31 ? `${rawJuryName.slice(0, 28)}...` : rawJuryName;
+
   const data = [
-    ['Team Name', ...evaluationCriteria.map(c => `${c.name} (${c.maxMarks})`), `Total (${evaluationCriteria.reduce((sum, c) => sum + c.maxMarks, 0)})`]
+    ['Team Name', 'Project Title', 'Members', ...evaluationCriteria.map(c => `${c.name} (${c.maxMarks})`), `Total (${evaluationCriteria.reduce((sum, c) => sum + c.maxMarks, 0)})`]
   ];
 
   teams.forEach(team => {
@@ -122,6 +128,8 @@ const createIndividualWorkbook = (scores) => {
 
     data.push([
       team.name,
+      team.projectTitle,
+      (team.members || []).join(', ') || 'No members listed',
       ...evaluationCriteria.map(criteria => teamScores[criteria.name] || 0),
       total
     ]);
@@ -130,11 +138,11 @@ const createIndividualWorkbook = (scores) => {
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.aoa_to_sheet(data);
   worksheet['!cols'] = [
-    { width: 15 },
+    { width: 15 }, { width: 30 }, { width: 40 },
     ...evaluationCriteria.map(() => ({ width: 12 })),
     { width: 10 }
   ];
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Marksheet');
+  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
   return workbook;
 };
