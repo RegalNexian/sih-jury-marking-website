@@ -1,160 +1,157 @@
-import * as XLSX from 'xlsx';
+import XlsxPopulate from 'xlsx-populate';
 import { teams, evaluationCriteria, juryProfiles } from '../data/juryData';
 
 export const exportToExcel = (data, identifier) => {
-  let workbook, filename;
   const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+  const juryId = parseInt(identifier, 10);
+  const jury = data.jury || juryProfiles.find((j) => j.id === juryId);
+  const filename = data.consolidated
+    ? `SIH_Consolidated_Marksheet_${timestamp}.xlsx`
+    : `SIH_Marksheet_${(jury?.name || `Jury_${identifier}`).replace(/\s+/g, '_')}_${timestamp}.xlsx`;
 
   if (data.consolidated) {
-    // Handle consolidated marksheet export
-    workbook = createConsolidatedWorkbook(data);
-    filename = `SIH_Consolidated_Marksheet_${timestamp}.xlsx`;
+    createConsolidatedWorkbook(data).then((blob) => triggerDownload(blob, filename));
   } else {
-    // Handle individual jury export
-    const juryId = parseInt(identifier, 10);
-    const jury = data.jury || juryProfiles.find((j) => j.id === juryId);
     const workbookData = data.scores || data;
-    workbook = createIndividualWorkbook(workbookData, {
+    createIndividualWorkbook(workbookData, {
       jury,
       submittedAt: data.submittedAt
-    });
-    const juryName = jury ? jury.name : `Jury_${identifier}`;
-    filename = `SIH_Marksheet_${juryName.replace(/\s+/g, '_')}_${timestamp}.xlsx`;
+    }).then((blob) => triggerDownload(blob, filename));
   }
-
-  // Save the file
-  XLSX.writeFile(workbook, filename);
 };
 
-// Create consolidated marksheet workbook
-const createConsolidatedWorkbook = (data) => {
-  const workbook = XLSX.utils.book_new();
+const triggerDownload = (blob, filename) => {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+};
 
-  // Summary Sheet
-  const summaryData = [
-    ['INTERNAL HACKATHON - CONSOLIDATED MARKSHEET'],
-    ['Parala Maharaja Engineering College'],
-    ['Generated:', new Date(data.generatedAt).toLocaleString()],
-    [''],
-    ['TEAM RANKINGS (by Average Score)'],
-    ['Rank', 'Team Name', 'Project Title', 'Average Score', 'Total Evaluators'],
-  ];
+const createConsolidatedWorkbook = async (data) => {
+  const workbook = await XlsxPopulate.fromBlankAsync();
+
+  const summarySheet = workbook.sheet(0).name('Summary');
+  summarySheet.cell('A1').value('INTERNAL HACKATHON - CONSOLIDATED MARKSHEET');
+  summarySheet.cell('A2').value('Parala Maharaja Engineering College');
+  summarySheet.cell('A3').value(['Generated:', new Date(data.generatedAt).toLocaleString()]);
+  summarySheet.cell('A5').value('TEAM RANKINGS (by Average Score)');
+  summarySheet.cell('A6').value(['Rank', 'Team Name', 'Project Title', 'Average Score', 'Total Evaluators']);
 
   data.teams.forEach((team, index) => {
-    summaryData.push([
-      index + 1,
-      team.name,
-      team.projectTitle,
-      parseFloat(team.averageScore),
-      team.submittedJuries
-    ]);
+    summarySheet
+      .row(7 + index)
+      .cell(1)
+      .value(index + 1)
+      .cell(2)
+      .value(team.name)
+      .cell(3)
+      .value(team.projectTitle)
+      .cell(4)
+      .value(parseFloat(team.averageScore))
+      .cell(5)
+      .value(team.submittedJuries);
   });
 
-  const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-  summarySheet['!cols'] = [{ width: 8 }, { width: 15 }, { width: 35 }, { width: 15 }, { width: 15 }];
-  XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+  summarySheet.column(1).width(8);
+  summarySheet.column(2).width(20);
+  summarySheet.column(3).width(35);
+  summarySheet.column(4).width(15);
+  summarySheet.column(5).width(18);
 
-  // Detailed Sheet with all jury scores
-  const detailedHeaders = [
-    'Rank', 'Team Name', 'Project Title', 'Members'
+  const detailSheet = workbook.addSheet('Detailed Scores');
+  const headerRow = [
+    'Rank',
+    'Team Name',
+    'Project Title',
+    'Members',
+    ...evaluationCriteria.map((criteria) => `${criteria.name} (Avg)`),
+    ...data.juries.flatMap((jury) => [
+      ...evaluationCriteria.map((criteria) => `${jury.name} - ${criteria.name}`),
+      `${jury.name} - Total`
+    ]),
+    'Overall Average',
+    'Total Evaluators'
   ];
-  
-  // Add criteria average columns
-  evaluationCriteria.forEach(criteria => {
-    detailedHeaders.push(`${criteria.name} (Avg)`);
-  });
-  
-  // Add individual jury columns
-  data.juries.forEach(jury => {
-    evaluationCriteria.forEach(criteria => {
-      detailedHeaders.push(`${jury.name} - ${criteria.name}`);
-    });
-    detailedHeaders.push(`${jury.name} - Total`);
-  });
-  
-  detailedHeaders.push('Overall Average', 'Total Evaluators');
-  
-  const detailedData = [detailedHeaders];
-  
+
+  detailSheet.cell('A1').value(headerRow);
+
   data.teams.forEach((team, index) => {
-    const row = [
-      index + 1,
-      team.name,
-      team.projectTitle,
-      (team.members || []).join(', ') || 'No members listed'
-    ];
-    
-    // Add criteria averages
-    evaluationCriteria.forEach(criteria => {
-      row.push(parseFloat(team.scores[criteria.name]?.average || 0));
-    });
-    
-    // Add individual jury scores
-    data.juries.forEach(jury => {
+    const averages = evaluationCriteria.map((criteria) => parseFloat(team.scores[criteria.name]?.average || 0));
+    const juryScores = data.juries.flatMap((jury) => {
       const juryScore = team.juryScores[jury.id];
       if (juryScore) {
-        evaluationCriteria.forEach(criteria => {
-          row.push(juryScore.scores[criteria.name] || 0);
-        });
-        row.push(juryScore.total);
-      } else {
-        // Jury didn't evaluate this team
-        evaluationCriteria.forEach(() => row.push('N/A'));
-        row.push('N/A');
+        return [
+          ...evaluationCriteria.map((criteria) => juryScore.scores[criteria.name] || 0),
+          juryScore.total
+        ];
       }
+      return [...evaluationCriteria.map(() => 'N/A'), 'N/A'];
     });
-    
-    row.push(parseFloat(team.averageScore), team.submittedJuries);
-    detailedData.push(row);
-  });
-  
-  const detailedSheet = XLSX.utils.aoa_to_sheet(detailedData);
-  detailedSheet['!cols'] = detailedHeaders.map(() => ({ width: 12 }));
-  XLSX.utils.book_append_sheet(workbook, detailedSheet, 'Detailed Scores');
 
-  return workbook;
+    detailSheet
+      .row(2 + index)
+      .cell(1)
+      .value(index + 1)
+      .cell(2)
+      .value(team.name)
+      .cell(3)
+      .value(team.projectTitle)
+      .cell(4)
+      .value((team.members || []).join(', ') || 'No members listed')
+      .cell(5)
+      .value(averages)
+      .cell(5 + averages.length)
+      .value(juryScores)
+      .cell(headerRow.length)
+      .value(parseFloat(team.averageScore))
+      .cell(headerRow.length + 1)
+      .value(team.submittedJuries);
+  });
+
+  detailSheet.column(1).width(8);
+  detailSheet.column(2).width(20);
+  detailSheet.column(3).width(30);
+  detailSheet.column(4).width(40);
+  headerRow.forEach((_, idx) => detailSheet.column(idx + 1).style({ bold: idx < headerRow.length }));
+
+  return workbook.outputAsync();
 };
 
-// Create individual jury workbook (legacy support)
-const createIndividualWorkbook = (scores, meta = {}) => {
-  const juryId = meta.jury?.id ?? null;
-  const rawJuryName = meta.jury?.name || (juryId ? `Jury ${juryId}` : 'Jury');
-  const sheetName = rawJuryName.length > 31 ? `${rawJuryName.slice(0, 28)}...` : rawJuryName;
+const createIndividualWorkbook = async (scores, meta = {}) => {
+  const workbook = await XlsxPopulate.fromBlankAsync();
+  const sheet = workbook.sheet(0).name('Evaluation');
 
-  const header = [
-    ['Individual Evaluation Summary'],
-    ['Evaluator', rawJuryName],
-    ['Jury ID', juryId ?? '—'],
-    ['Last Submitted', meta.submittedAt ? new Date(meta.submittedAt).toLocaleString() : 'Not available'],
-    ['Exported', new Date().toLocaleString()],
-    [''],
-    ['Team Name', 'Project Title', 'Members', ...evaluationCriteria.map(c => `${c.name} (${c.maxMarks})`), `Total (${evaluationCriteria.reduce((sum, c) => sum + c.maxMarks, 0)})`]
-  ];
+  sheet.cell('A1').value('Individual Evaluation Summary');
+  sheet.cell('A2').value(['Evaluator', meta.jury?.name || '—']);
+  sheet.cell('A3').value(['Jury ID', meta.jury?.id ?? '—']);
+  sheet.cell('A4').value(['Last Submitted', meta.submittedAt ? new Date(meta.submittedAt).toLocaleString() : 'Not available']);
+  sheet.cell('A5').value(['Exported', new Date().toLocaleString()]);
+  sheet.cell('A7').value([
+    'Team Name',
+    ...evaluationCriteria.map((criteria) => `${criteria.name} (${criteria.maxMarks})`),
+    `Total (${evaluationCriteria.reduce((sum, criteria) => sum + criteria.maxMarks, 0)})`
+  ]);
 
-  const rows = teams.map((team) => {
+  teams.forEach((team, index) => {
     const teamScores = scores[team.id] || {};
     const total = evaluationCriteria.reduce((sum, criteria) => sum + (teamScores[criteria.name] || 0), 0);
-    return [
-      team.name,
-      team.projectTitle,
-      (team.members || []).join(', ') || 'No members listed',
-      ...evaluationCriteria.map((criteria) => teamScores[criteria.name] || 0),
-      total
-    ];
+    sheet
+      .row(8 + index)
+      .cell(1)
+      .value(team.name)
+      .cell(2)
+      .value(evaluationCriteria.map((criteria) => teamScores[criteria.name] || 0))
+      .cell(2 + evaluationCriteria.length)
+      .value(total);
   });
 
-  const data = [...header, ...rows];
+  sheet.column(1).width(20);
+  evaluationCriteria.forEach((_, idx) => sheet.column(2 + idx).width(12));
+  sheet.column(2 + evaluationCriteria.length).width(15);
 
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.aoa_to_sheet(data);
-  worksheet['!cols'] = [
-    { width: 18 },
-    { width: 30 },
-    { width: 40 },
-    ...evaluationCriteria.map(() => ({ width: 12 })),
-    { width: 12 }
-  ];
-  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-
-  return workbook;
+  return workbook.outputAsync();
 };
